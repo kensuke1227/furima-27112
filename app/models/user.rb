@@ -28,6 +28,7 @@ class User < ApplicationRecord
   with_options presence: true, format: { with: /\A[\p{katakana}  ー－&&[^ -~｡-ﾟ]]+\z/, message: 'Full-width katakana characters' } do
     validates :first_name_kana
     validates :last_name_kana
+  end
 
   # <<アソシエーション>>
   has_many :items
