@@ -9,6 +9,14 @@ class OrdersController < ApplicationController
   end
  
   def create
+    @item_order = PayForm.new(item_order_params)
+
+    if @item_order.valid?
+      pay_item
+      @item_order.save
+      return redirect_to root_path
+    end
+    render 'index'
   end
 
   private
@@ -17,4 +25,26 @@ class OrdersController < ApplicationController
     @item = Item.find(params[:item_id])
   end
 
+  def item_order_params
+    params.permit(
+      :item_id,
+      :token,
+      :postal_code,
+      :prefecture_id,
+      :city,
+      :addresses,
+      :building,
+      :phone_number
+    ).merge(user_id: current_user.id)
+  end
+
+  # 　決済をここでしている
+  def pay_item
+    Payjp.api_key = ENV['PAYJP_SECRET_KEY'] #環境変数と合わせましょう
+    Payjp::Charge.create(
+      amount: @item.price, # 決済額
+      card: item_order_params[:token], # カード情報
+      currency: 'jpy' # 通貨単位
+    )
+  end
 end
